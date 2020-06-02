@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+    body{
+        margin-top: 100px;
+        text-align: center;
+    } 
+    p{
+        font-size: 40px;
+    }
+    
+     </style>
+</head>
+<body> 
+    <input type="text" id = "city" placeholder="Enter city" required>
+    <button onclick="putcity()">Search<i class="fa fa-search"></i></button>
+     &nbsp;or&nbsp;
+    <button onclick="getLocation()"><i class="fa fa-map-marker" style="font-size:48px;color:red"></i></button>
+    <br>
+    <br>
+    <div id="icon"><img id="wicon" src="white.png" alt="Weather icon" width="200px" height="200px"></div>
+    <p id = "para"></p>
+</body> 
+          <script>
+             x = document.getElementById("para"); 
+            function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(passPosition);
+            } else { 
+            x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }          
+                    function passPosition(position) {
+                      var data = {};
+                      data.lat = position.coords.latitude; 
+                      data.lon = position.coords.longitude;
+            
+                      console.log(data); 
+                      $.ajax({
+						type: 'POST',
+						data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        url: '/bycoord',						
+                        success: function(result) {
+                            console.log('success');
+                            console.log(result);
+                            x.innerHTML=result.main.temp-273.15+'&deg;C '+ result.weather[0].main +"<br>in<br>"+ result.name; 
+                            var iconurl = "http://openweathermap.org/img/w/" + result.weather[0].icon + ".png";
+                            $('#wicon').attr('src', iconurl);
+                        }
+                    });
+                }
+            var y = document.getElementById("city");
+            function putcity()
+            {       var data = {"city" : y.value};
+                      $.ajax({
+						type: 'POST',
+						data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        url: '/bycity',						
+                        success: function(result) {
+                            console.log('success');
+                            console.log(result);
+                            x.innerHTML=(result.main.temp-273.15).toFixed(2)+'&deg;C '+ result.weather[0].main +"<br>in<br>"+ result.name+', '+result.sys.country; 
+                            var iconurl = "http://openweathermap.org/img/w/" + result.weather[0].icon + ".png";
+                            $('#wicon').attr('src', iconurl);
+                        }
+                    });
+            }        
+          </script>
+</html>
